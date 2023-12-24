@@ -8,7 +8,6 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
-
 DOCS_FILE_ID = ""
 SHEETS_FILE_ID = ""
 
@@ -32,14 +31,25 @@ def get_data():
 
 
 def merge_template(data, tmpl_id):
+    data_refs = []
+    data_merged = []
+    for row in data:
+        merged = dict(zip(COLUMNS, row))
+        data_ref = str(row[1:8])
+        if data_ref in data_refs:
+            print(f"Duplicate removed: {data_ref}")
+            continue
+
+        data_merged.append(merged)
+        data_refs.append(data_ref)
+
     contents_original = DRIVE.files().export(fileId=tmpl_id, mimeType="text/plain").execute()
     contents = contents_original.decode("utf-8")
     output = ""
     breakpoints = []
-    for row in data:
-        merge = dict(zip(COLUMNS, row))
+    for row in data_merged:
         buff = contents
-        for key, value in merge.items():
+        for key, value in row.items():
             buff = buff.replace("{{key}}".replace("key", key), value)
         output += buff
         breakpoints.append(len(bytes(buff, "utf-8").replace(b"\r\n", b"\n")) - 1)
