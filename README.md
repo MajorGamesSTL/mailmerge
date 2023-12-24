@@ -9,6 +9,8 @@ Create a google service with required permissions and download the oauth credent
 * https://developers.google.com/apps-script/samples/automations/mail-merge
 
 Create a base doc with variables denoted as {{varname}}, these will reference column names.
+If {{varname}} with whitespace before it is the only thing on the line, the line will be removed if varname is unset for a specific row.
+Use spaces for indentation, not formatting tools.
 
 In mailmerge.py, set the doc and sheets id based on the URLs.
 

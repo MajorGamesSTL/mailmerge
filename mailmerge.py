@@ -2,6 +2,7 @@
 Google Drive mail merger.
 """
 import os.path
+import re
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -50,7 +51,11 @@ def merge_template(data, tmpl_id):
     for row in data_merged:
         buff = contents
         for key, value in row.items():
+            if value == "":
+                buff = re.sub(r"\W*{{key}}[^.]".replace("key", key), "", buff)
+
             buff = buff.replace("{{key}}".replace("key", key), value)
+
         output += buff
         breakpoints.append(len(bytes(buff, "utf-8").replace(b"\r\n", b"\n")) - 1)
 
@@ -71,7 +76,7 @@ if __name__ == "__main__":
     creds = None
     if os.path.exists("token.json"):
         creds = Credentials.from_authorized_user_file("token.json", SCOPES)
-    # If there are no (valid) credentials available, let the user log in.
+
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
@@ -80,7 +85,7 @@ if __name__ == "__main__":
                 "credentials.json", SCOPES
             )
             creds = flow.run_local_server(port=0)
-        # Save the credentials for the next run
+
         with open("token.json", "w") as token:
             token.write(creds.to_json())
 
